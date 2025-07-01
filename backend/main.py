@@ -1,19 +1,19 @@
-from fastapi import FastAPI, Request, HTTPException
+from fastapi import FastAPI, Request, HTTPException, Body
 from fastapi.responses import JSONResponse
-from fastapi import Body
 from typing import Dict, Any
 from mcp_clients.reminders import send_to_reminder_mcp
 from mcp_clients.weather import send_to_weather_mcp
+from mcp_clients.finance import send_to_finance_mcp
 import requests
 
 app = FastAPI()
 
-#  Health check
+# -------------------- Root Health Check --------------------
 @app.get("/")
 def read_root() -> Dict[str, str]:
     return {"message": "Personal Assistant Chatbot Backend is running"}
 
-#  Create new reminder
+# -------------------- Reminder Endpoints --------------------
 @app.post("/reminder")
 async def reminder_endpoint(request: Request) -> JSONResponse:
     try:
@@ -22,18 +22,15 @@ async def reminder_endpoint(request: Request) -> JSONResponse:
         # Validation
         if "task" not in body or "time" not in body:
             return JSONResponse(status_code=400, content={"error": "Missing 'task' or 'time'"})
-
         if not isinstance(body["task"], str) or not isinstance(body["time"], str):
             return JSONResponse(status_code=400, content={"error": "'task' and 'time' must be strings"})
 
-        # Forward to MCP
         response = send_to_reminder_mcp(body)
         return JSONResponse(content=response)
 
     except Exception as e:
         return JSONResponse(status_code=500, content={"error": "Something went wrong", "details": str(e)})
 
-#  View all reminders
 @app.get("/reminders")
 def get_reminders():
     try:
@@ -42,7 +39,6 @@ def get_reminders():
     except Exception as e:
         return {"error": str(e)}
 
-#  Delete a reminder
 @app.delete("/reminder/{reminder_id}")
 def delete_reminder(reminder_id: int):
     try:
@@ -56,7 +52,6 @@ def delete_reminder(reminder_id: int):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-# PUT /reminder/{reminder_id} — Forward edit to MCP
 @app.put("/reminder/{reminder_id}")
 def update_reminder(reminder_id: int, data: dict = Body(...)):
     try:
@@ -69,8 +64,8 @@ def update_reminder(reminder_id: int, data: dict = Body(...)):
             raise HTTPException(status_code=500, detail="Unexpected error")
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-    
-# POST /weather — Forward weather query to MCP
+
+# -------------------- Weather Endpoint --------------------
 @app.post("/weather")
 async def weather_endpoint(request: Request) -> Dict[str, str]:
     body = await request.json()
@@ -79,5 +74,25 @@ async def weather_endpoint(request: Request) -> Dict[str, str]:
     if not location or not isinstance(location, str):
         return {"error": "Missing or invalid 'location'"}
 
-    response = send_to_weather_mcp(location)
-    return response
+    return send_to_weather_mcp(location)
+
+# -------------------- Finance Endpoint --------------------
+@app.post("/finance")
+async def finance_endpoint(request: Request) -> Dict[str, str]:
+    body: Dict[str, Any] = await request.json()
+
+    amount = body.get("amount")
+    from_currency = body.get("from_currency")
+    to_currency = body.get("to_currency")
+
+    # Validation
+    if not all([amount, from_currency, to_currency]):
+        return {"error": "Missing required parameters"}
+
+    payload = {
+        "amount": amount,
+        "from_currency": from_currency,
+        "to_currency": to_currency,
+    }
+
+    return send_to_finance_mcp(payload)
