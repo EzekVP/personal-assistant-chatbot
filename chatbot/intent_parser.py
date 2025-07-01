@@ -65,3 +65,12 @@ def parse_currency_conversion(text: str) -> Optional[Tuple[float, str, str]]:
         amount, from_currency, to_currency = match.groups()
         return float(amount), from_currency.upper(), to_currency.upper()
     return None
+
+# -------------------- Wikipaedia Parsing --------------------
+def parse_wikipedia_query(text: str) -> Optional[str]:
+    keywords = ["who is", "what is", "tell me about", "define"]
+    text_lower = text.lower()
+    for kw in keywords:
+        if text_lower.startswith(kw):
+            return text[len(kw):].strip("? ").strip()
+    return None

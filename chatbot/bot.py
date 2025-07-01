@@ -3,10 +3,12 @@ from intent_parser import (
     parse_edit_reminder,
     parse_weather,
     parse_currency_conversion,
+    parse_wikipedia_query
 )
 from reminder_client import create_reminder, view_reminders, delete_reminder, update_reminder
 from weather_client import get_weather
-from finance_client import get_conversion_result  # ✅ Add this import
+from finance_client import get_conversion_result
+from wiki_client import get_wiki_summary
 
 print("🤖 Personal Assistant Chatbot (type 'exit' to quit)")
 
@@ -17,7 +19,14 @@ while True:
         print("Bot: Goodbye!")
         break
 
-    # ✅ Currency Conversion intent
+    # Wikipedia intent
+    query = parse_wikipedia_query(user_input)
+    if query:
+        response = get_wiki_summary(query)
+        print(f"Bot: {response}")
+        continue
+
+    # Currency Conversion intent
     conversion = parse_currency_conversion(user_input)
     if conversion:
         amount, from_currency, to_currency = conversion
@@ -25,14 +34,14 @@ while True:
         print(f"Bot: {response}")
         continue
 
-    # 🌤️ Weather intent
+    # Weather intent
     location = parse_weather(user_input)
     if location:
         response = get_weather(location)
         print(f"Bot: {response}")
         continue
 
-    # ⏰ Reminder creation
+    # Reminder creation
     result = parse_reminder(user_input)
     if result:
         task, time = result
@@ -40,13 +49,13 @@ while True:
         print(f"Bot: {response}")
         continue
 
-    # 📋 View reminders
+    # View reminders
     elif "show my reminders" in user_input.lower() or "show my tasks" in user_input.lower():
         response = view_reminders()
         print(f"Bot:\n{response}")
         continue
 
-    # 🗑️ Delete reminder
+    # Delete reminder
     elif "delete reminder" in user_input.lower() or "remove reminder" in user_input.lower() or "delete task" in user_input.lower() or "remove task" in user_input.lower():
         words = user_input.strip().split()
         try:
@@ -57,7 +66,7 @@ while True:
             print("Bot: Please specify a valid reminder ID to delete.")
         continue
 
-    # ✏️ Edit reminder
+    # Edit reminder
     elif "edit task" in user_input.lower() or "update task" in user_input.lower() or "change task" in user_input.lower():
         parsed = parse_edit_reminder(user_input)
         if parsed:

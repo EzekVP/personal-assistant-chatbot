@@ -4,6 +4,7 @@ from typing import Dict, Any
 from mcp_clients.reminders import send_to_reminder_mcp
 from mcp_clients.weather import send_to_weather_mcp
 from mcp_clients.finance import send_to_finance_mcp
+from mcp_clients.wiki import send_to_wiki_mcp
 import requests
 
 app = FastAPI()
@@ -96,3 +97,16 @@ async def finance_endpoint(request: Request) -> Dict[str, str]:
     }
 
     return send_to_finance_mcp(payload)
+
+# -------------------- Wikipaedia Endpoint --------------------
+
+# POST /wiki — Forward query to Wikipedia MCP server
+@app.post("/wiki")
+async def wiki_endpoint(request: Request) -> Dict[str, str]:
+    body: Dict[str, Any] = await request.json()
+    query = body.get("query")
+
+    if not query or not isinstance(query, str):
+        return {"error": "Missing or invalid 'query'"}
+
+    return send_to_wiki_mcp(query)
