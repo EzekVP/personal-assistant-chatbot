@@ -2,7 +2,7 @@ import requests
 from typing import Dict, Any
 
 def send_to_reminder_mcp(payload: Dict[str, Any]) -> Dict[str, Any]:
-    # example url please change later
+    # url for my reminder mcp server   
     mcp_url = "http://localhost:9001/mcp"
 
     try:

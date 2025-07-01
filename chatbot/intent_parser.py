@@ -34,3 +34,13 @@ def parse_edit_reminder(text: str) -> Optional[Tuple[int, str, str]]:
         reminder_id, task, time = match.groups()
         return int(reminder_id), task.strip(), time.strip()
     return None
+
+def parse_weather(text: str) -> Optional[str]:
+    """
+    Extracts location from user text like 'weather in Mumbai'
+    """
+    pattern = r"(?:weather|temperature|forecast) in ([a-zA-Z\s]+)"
+    match = re.search(pattern, text.lower())
+    if match:
+        return match.group(1).strip()
+    return None

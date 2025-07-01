@@ -1,5 +1,6 @@
-from intent_parser import parse_reminder, parse_edit_reminder
+from intent_parser import parse_reminder, parse_edit_reminder, parse_weather
 from reminder_client import create_reminder, view_reminders, delete_reminder, update_reminder
+from weather_client import get_weather
 
 print("🤖 Personal Assistant Chatbot (type 'exit' to quit)")
 
@@ -9,6 +10,14 @@ while True:
     if user_input.lower() == "exit":
         print("Bot: Goodbye!")
         break
+
+    # Weather intent
+    location = parse_weather(user_input)
+    if location:
+        response = get_weather(location)
+        print(f"Bot: {response}")
+        continue
+
 
     #  Parse and create a reminder
     result = parse_reminder(user_input)

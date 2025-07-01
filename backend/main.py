@@ -3,6 +3,7 @@ from fastapi.responses import JSONResponse
 from fastapi import Body
 from typing import Dict, Any
 from mcp_clients.reminders import send_to_reminder_mcp
+from mcp_clients.weather import send_to_weather_mcp
 import requests
 
 app = FastAPI()
@@ -55,7 +56,7 @@ def delete_reminder(reminder_id: int):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-# 🔄 PUT /reminder/{reminder_id} — Forward edit to MCP
+# PUT /reminder/{reminder_id} — Forward edit to MCP
 @app.put("/reminder/{reminder_id}")
 def update_reminder(reminder_id: int, data: dict = Body(...)):
     try:
@@ -68,3 +69,15 @@ def update_reminder(reminder_id: int, data: dict = Body(...)):
             raise HTTPException(status_code=500, detail="Unexpected error")
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+    
+# POST /weather — Forward weather query to MCP
+@app.post("/weather")
+async def weather_endpoint(request: Request) -> Dict[str, str]:
+    body = await request.json()
+    location = body.get("location")
+
+    if not location or not isinstance(location, str):
+        return {"error": "Missing or invalid 'location'"}
+
+    response = send_to_weather_mcp(location)
+    return response
