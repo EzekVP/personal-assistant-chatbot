@@ -74,3 +74,28 @@ def parse_wikipedia_query(text: str) -> Optional[str]:
         if text_lower.startswith(kw):
             return text[len(kw):].strip("? ").strip()
     return None
+
+# -------------------- Dictionary Parsing --------------------
+def parse_dictionary(text: str) -> Optional[str]:
+    """
+    Extract the word for dictionary lookup.
+    Examples:
+        - "what does ephemeral mean"
+        - "define recursion"
+        - "meaning of ambiguous"
+    """
+    text = text.lower().strip()
+
+    patterns = [
+        r"what does (\w+) mean",
+        r"define (\w+)",
+        r"meaning of (\w+)",
+        r"what is the meaning of (\w+)",
+        r"explain (\w+)"
+    ]
+
+    for pattern in patterns:
+        match = re.match(pattern, text)
+        if match:
+            return match.group(1)
+    return None

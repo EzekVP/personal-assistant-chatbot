@@ -3,12 +3,14 @@ from intent_parser import (
     parse_edit_reminder,
     parse_weather,
     parse_currency_conversion,
-    parse_wikipedia_query
+    parse_wikipedia_query,
+    parse_dictionary
 )
 from reminder_client import create_reminder, view_reminders, delete_reminder, update_reminder
 from weather_client import get_weather
 from finance_client import get_conversion_result
 from wiki_client import get_wiki_summary
+from dictionary_client import get_definition 
 
 print("🤖 Personal Assistant Chatbot (type 'exit' to quit)")
 
@@ -18,6 +20,13 @@ while True:
     if user_input.lower() == "exit":
         print("Bot: Goodbye!")
         break
+   
+    # Dictionary intent
+    word = parse_dictionary(user_input)
+    if word:
+        response = get_definition(word)
+        print(f"Bot: {response}")
+        continue
 
     # Wikipedia intent
     query = parse_wikipedia_query(user_input)
